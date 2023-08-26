@@ -9,3 +9,11 @@ export function calculateChecksum(number: number): number {
         (number % 10) + calculateChecksum(Math.floor(number / 10))
     );
 }
+
+export function EurFormatter(price: number): string {
+    let EUR = new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+    });
+    return EUR.format(price);
+}

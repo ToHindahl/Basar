@@ -29,7 +29,7 @@ const insertItem = (req: Request, res: Response) => {
         res.status(400).json({ error: 'Verkäufer hat das maximale Limit erreicht' });
         return;
       }
-      if(newItem.sellerNumber >= basar.lowestSellerNumber && newItem.sellerNumber <= basar.highestSellerNumber) {
+      if((newItem.sellerNumber < basar.lowestSellerNumber) || (newItem.sellerNumber > basar.highestSellerNumber)) {
         res.status(400).json({ error: 'Verkäufernummer nicht im Nummernkreis' });
         return;
       }
@@ -41,6 +41,30 @@ const insertItem = (req: Request, res: Response) => {
         res.status(201).json(newItem);
       });
     });
+  });
+};
+
+const updateItem = (req: Request, res: Response) => {
+  const newItem : Item= {
+    ...req.body
+  }
+  iModel.updateItem(newItem, (err : any, success : boolean) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.status(201).json(success);
+  });
+};
+
+const deleteItem = (req: Request, res: Response) => {
+  const itemId = req.params.itemId;
+  iModel.deleteItem(itemId, (err : any, success : boolean) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.status(201).json(success);
   });
 };
 
@@ -67,4 +91,16 @@ const getAllItemsByBasarBySeller = (req: Request, res: Response) => {
   });
 };
 
-export { insertItem, getAllItemsByBasar, getAllItemsByBasarBySeller };
+const getAllItemsByBasarByCreator = (req: Request, res: Response) => {
+  const basarId = req.params.basarId;
+  const creator = req.params.creator;
+  iModel.getAllItemsByBasarByCreator(basarId, creator, (err : any, items : Item[]) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(items);
+  });
+};
+
+export { insertItem, getAllItemsByBasar, getAllItemsByBasarBySeller, deleteItem, updateItem, getAllItemsByBasarByCreator };

@@ -19,18 +19,27 @@ const insertBasar = (req: Request, res: Response) => {
   });
 };
 
-const removeBasar = (req: Request, res: Response) => {
-  const basarId = req.params.basarId;
+const updateBasar = (req: Request, res: Response) => {
   const newBasar : Basar= {
-    id: uuidv4().toString(),
     ...req.body
   }
-  bModel.insertBasar(newBasar, (err : any) => {
+  bModel.updateBasar(newBasar, (err : any, success : boolean) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.status(201).json(newBasar);
+    res.status(201).json(success);
+  });
+};
+
+const deleteBasar = (req: Request, res: Response) => {
+  const basarId = req.params.basarId;
+  bModel.deleteBasar(basarId, (err : any, success : boolean) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.status(201).json(success);
   });
 };
 
@@ -55,4 +64,4 @@ const getBasarsById = (req: Request, res: Response) => {
   });
 };
 
-export { insertBasar, getAllBasars, getBasarsById };
+export { insertBasar, getAllBasars, getBasarsById, deleteBasar, updateBasar };
