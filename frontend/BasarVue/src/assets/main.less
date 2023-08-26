@@ -1,0 +1,132 @@
+@import "./base.css";
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 124px) {
+  body {
+    padding: 2rem;
+    display: flex;
+  }
+
+  #app {
+    display: grid;
+    place-items: center;
+    gap: 1rem;
+  }
+}
+
+button,
+.defaultButton {
+  font-size: 1rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  width: 100%;
+  color: #4ca0ad;
+  border-radius: 0.5rem;
+  &.outlined {
+    border: 2px solid #4ca0ad;
+    &:hover {
+      background-color: lighten(#4ca0ad, 40%);
+    }
+    &:disabled {
+      border-color: #898989;
+    }
+  }
+  &:not(.outlined) {
+    background-color: #4ca0ad;
+    color: white;
+    &:hover {
+      background-color: lighten(#4ca0ad, 10%);
+    }
+    &:disabled {
+      background-color: #898989;
+    }
+  }
+}
+
+.inputWrapper {
+  position: relative;
+  input,
+  input + label {
+    height: 2.5rem;
+  }
+  input,
+  textarea {
+    &,
+    & + label {
+      transition: all 0.25s;
+      transform-origin: 0 0;
+      font-size: 15px;
+    }
+    margin: 0;
+    resize: none;
+    padding: 0.75rem;
+    background-color: lighten(lightgray, 10%);
+    border-radius: 0.5rem;
+    width: 100%;
+    border: transparent solid 2px;
+    &.invalid,
+    &:invalid {
+      border-color: var(--clr-error);
+    }
+
+    &::placeholder {
+      color: transparent;
+    }
+    position: relative;
+
+    & + label {
+      opacity: 0.75;
+    }
+
+    &:focus,
+    &:not(:placeholder-shown) {
+      & + label {
+        transform: translate(0%, -33%) scale(0.9);
+        opacity: 1;
+      }
+      margin-top: 1rem;
+    }
+
+    &::-webkit-datetime-edit {
+      &::placeholder {
+        color: green;
+      }
+      color: "white";
+    }
+  }
+  label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    user-select: none;
+    padding-left: 0.75rem;
+    display: flex;
+    align-items: center;
+  }
+
+  button {
+    .defaultButton();
+  }
+}
