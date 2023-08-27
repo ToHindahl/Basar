@@ -1,5 +1,5 @@
 import sqlite3 from 'sqlite3';
-import { itemModel } from './itemModel';
+import { itemModel, Item } from './itemModel';
 
 const iModel = new itemModel();
 
@@ -33,7 +33,7 @@ class sellerModel {
         email TEXT,
         telephone TEXT,
         sellerNumber INTEGER,
-        commission REAL,
+        comission REAL,
         basarId TEXT,
         createdAt TEXT
       )
@@ -119,7 +119,7 @@ class sellerModel {
   
     getSellerByBasarIdBySellerNumber(basarId: string, sellerNumber: number, callback: (err: Error | null, seller: Seller) => void) {
         const query = 'SELECT * FROM sellers WHERE basarId = ? AND sellerNumber = ?';
-        this.db.get(query, [basarId, sellerModel], (err, row) => {
+        this.db.get(query, [basarId, sellerNumber], (err, row) => {
             if (err) {
                 callback(err, {} as Seller);
                 return;
@@ -127,7 +127,28 @@ class sellerModel {
             callback(null, row as Seller);
         });
     }
-  
+
+    getSellerById(sellerId: string, callback: (err: Error | null, seller: Seller) => void) {
+        const query = 'SELECT * FROM sellers WHERE id = ?';
+        this.db.get(query, [sellerId], (err, row) => {
+            if (err) {
+                callback(err, {} as Seller);
+                return;
+            }
+            callback(null, row as Seller);
+        });
+    }
+
+    getAllSellersByBasar(basarId: string, callback: (err: Error | null, sellers: Seller[]) => void) {
+        const query = 'SELECT * FROM sellers WHERE basarId = ?';
+        this.db.all(query, [basarId], (err, rows) => {
+            if (err) {
+                callback(err, []);
+                return;
+            }
+            callback(null, rows as Seller[]);
+        });
+    }
 
 }
 

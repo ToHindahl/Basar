@@ -24,12 +24,13 @@ const updateBasar = (req: Request, res: Response) => {
   const newBasar : Basar= {
     ...req.body
   }
-  bModel.updateBasar(newBasar, (err : any, success : boolean) => {
+  bModel.updateBasar(newBasar, (err: any, success: boolean) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
+    } else {
+      res.status(201).json(success);
     }
-    res.status(201).json(success);
   });
 };
 

@@ -9,83 +9,82 @@ const bModel = new basarModel();
 const iModel = new itemModel();
 const sModel = new sellerModel();
 
-const insertItem = (req: Request, res: Response) => {
-  sModel.getSellerByBasarIdBySellerNumber(req.body.basarId, req.body.sellerNumber, (err, seller) => {
-    if (err) {
-
-      const newSeller: Seller = {
-        id: uuidv4().toString(),
-        sellerNumber: req.body.sellerNumber,
-        basarId: req.body.basarId,
-        createdAt: new Date().toISOString(),
-        firstname: '',
-        lastname: '',
-        email: '',
-        telephone: '',
-        commission: 0
-      };
-      sModel.insertSeller(newSeller, (err) => {
-        if (err) {
-          res.status(500).json({ error: err.message });
-          return;
-       }
-       insertItem(req, res);  
-      });
-    }
-
-    const newItem: Item = {
-      id: uuidv4().toString(),
-      ...req.body,
-      sellerId: seller.id,
-
-      //@ts-ignore
-
-      creator: req.user.username,
-      createdAt: new Date().toISOString(),
-    };
-
-    iModel.getAllItemsBySellerId(newItem.sellerId, (err, items) => {
+  const insertItem = (req: Request, res: Response) => {
+    sModel.getSellerByBasarIdBySellerNumber(req.body.basarId, req.body.sellerNumber, (err, seller) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
 
-      bModel.getBasarsById(newItem.basarId, (err, basar) => {
-        if (err) {
-          res.status(500).json({ error: err.message });
-          return;
-        }
-        if(items.length >= basar.maxItemsPerSeller) {
-          res.status(400).json({ error: 'Verkäufer hat das maximale Limit erreicht' });
-          return;
-        }
-        if((seller.sellerNumber < basar.lowestSellerNumber) || (seller.sellerNumber > basar.highestSellerNumber)) {
-          res.status(400).json({ error: 'Verkäufernummer nicht im Nummernkreis' });
-          return;
-        }
-        iModel.insertItem(newItem, (err) => {
+      if(seller === undefined) {
+        const newSeller: Seller = {
+          id: uuidv4().toString(),
+          sellerNumber: req.body.sellerNumber,
+          basarId: req.body.basarId,
+          createdAt: new Date().toISOString(),
+          firstname: '',
+          lastname: '',
+          email: '',
+          telephone: '',
+          commission: 0
+        };
+        sModel.insertSeller(newSeller, (err) => {
           if (err) {
             res.status(500).json({ error: err.message });
             return;
           }
-          res.status(201).json(newItem);
+          insertItem(req, res);
         });
-      });
+      } else {
+        const newItem: Item = {
+          id: uuidv4().toString(),
+          ...req.body,
+          sellerId: seller.id,
+          //@ts-ignore
+          creator: req.user.username,
+          createdAt: new Date().toISOString(),
+        };
+
+        iModel.getAllItemsBySellerId(newItem.sellerId, (err, items) => {
+          if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+          }
+
+          bModel.getBasarsById(newItem.basarId, (err, basar) => {
+            if (err) {
+              res.status(500).json({ error: err.message });
+              return;
+            }
+            if(items.length >= basar.maxItemsPerSeller) {
+              res.status(400).json({ error: 'Verkäufer hat das maximale Limit erreicht' });
+              return;
+            }
+            if((seller.sellerNumber < basar.lowestSellerNumber) || (seller.sellerNumber > basar.highestSellerNumber)) {
+              res.status(400).json({ error: 'Verkäufernummer nicht im Nummernkreis' });
+              return;
+            }
+            iModel.insertItem(newItem, (err) => {
+              if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+              }
+              res.status(201).json(newItem);
+            });
+          });
+        });
+      }
     });
-    
-  });
   };
 
   const updateItem = (req: Request, res: Response) => {
-    const newItem : Item= {
-      ...req.body
-    }
-    iModel.updateItem(newItem, (err : any, success : boolean) => {
+    console.log(req.body);
+    iModel.deleteItem(req.body.id, (err) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      res.status(201).json(success);
+      insertItem(req, res); 
     });
   };
 
@@ -140,6 +139,7 @@ const getAllItemsByBasarByCreator = (req: Request, res: Response) => {
       return;
     }
     res.json(items);
+    
   });
 };
 

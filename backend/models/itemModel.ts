@@ -105,6 +105,9 @@ class itemModel {
     });
   }
 
+  
+
+
 }
 
 export { itemModel, Item, ItemSale };

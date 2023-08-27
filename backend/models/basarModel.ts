@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3';
 import { Item , itemModel, ItemSale } from './itemModel';
 import { SalesList } from '../controllers/pdfController';
-import { sellerModel } from './sellerModel';
+import { Seller, sellerModel } from './sellerModel';
 
 const iModel = new itemModel();
 const sModel = new sellerModel();
@@ -115,25 +115,27 @@ class basarModel {
         }
 
         //check if we can resize the basar
-        if (basar.highestSellerNumber > sellerNumber) {
-          callback(Error("TODO ERROR MESSAGE"), false);
-        }
-
-        //update
-        const query = 'DELETE FROM basars WHERE id = ?';
-        this.db.run(query, [basar.id],(err) => {
-          if (err) {
-            callback(err, false);
-            return;
-          }
-          this.insertBasar(basar, (err) => {
+        if (basar.highestSellerNumber < sellerNumber) {
+          callback(new Error("Can not resize Basar because highest Seller is higher than your input!"), false);
+          return;
+        } else {
+          //update
+          const query = 'DELETE FROM basars WHERE id = ?';
+          this.db.run(query, [basar.id],(err) => {
             if (err) {
               callback(err, false);
               return;
             }
-            callback(null, true);
+            this.insertBasar(basar, (err) => {
+              if (err) {
+                callback(err, false);
+                return;
+              }
+              callback(null, true);
+            });
           });
-        });
+        }
+
       });
     });
   }
@@ -150,58 +152,71 @@ class basarModel {
   }
 
   getSalesByBasar(basarId: string, callback: (err: Error | null, sales: SalesList) => void) {
-    iModel.getAllItemsByBasar(basarId, (err : any, items : Item[]) => {
+    sModel.getAllSellerByBasar(basarId, (err : any, sellersList : Seller[]) => {
       if (err) {
         callback(err, {});
         return;
       }
 
-      items = items.sort((a, b) => a.sellerId < b.sellerId ? -1 : 1);
-  
-      //split into lists by seller numbers
-      let sellers: {[key: string]: Item[]} = {};
-      items.forEach((item) => {
-        if (item.sellerId in sellers) {
-          sellers[item.sellerId].push(item);
-        } else {
-          sellers[item.sellerId] = [item];
-        }
-      });
+      let sellersDict: {[key: string]: {number}} = {}
+      sellersList.forEach((seller) => {
+        sellersDict[seller.id] = seller.sellerNumber
+      })
 
-      let result: SalesList = {};
-
-      this.getBasarsById(basarId, (err : any, basar: Basar) => {
+      iModel.getAllItemsByBasar(basarId, (err : any, items : Item[]) => {
         if (err) {
           callback(err, {});
           return;
         }
-        for (const seller in sellers) {
-          //calculate comission
-          let commission = 0;
-          if(Number.parseInt(seller) >= (basar.lowestSellerNumber + basar.commissionFreeSellers)) {
-            commission = basar.commission
-          }
 
-          //
-          let sum = 0;
-          let comSum = 0;
-          let count = 0;
-          let sellerItemSales: ItemSale[] = []
-          sellers[seller].forEach((item) => {
-            count += 1;
-            sum += item.price;
-            const saleCom = (item.price * commission / 100);
-            const salePayout = item.price - saleCom;
-            comSum += saleCom;
-            sellerItemSales.push({...item, comission: saleCom, payout: salePayout})
-          })
-          const payout = sum - comSum;
-          
-          //extend result
-          result[seller] = {stats: {count: count, sum: sum, commissionSum: comSum, payout: payout}, items: sellerItemSales};
-        }
-        //return SalesList result
-        callback(null, result);
+        items = items.sort((a, b) => a.sellerId < b.sellerId ? -1 : 1);
+    
+        //split into lists by seller numbers
+        let sellers: {[key: string]: Item[]} = {};
+        items.forEach((item) => {
+          let sellerNumber = sellersDict[item.sellerId]
+          if (sellerNumber in sellers) {
+            sellers[sellerNumber].push(item);
+          } else {
+            sellers[sellerNumber] = [item];
+          }
+        });
+
+        let result: SalesList = {};
+
+        this.getBasarsById(basarId, (err : any, basar: Basar) => {
+          if (err) {
+            callback(err, {});
+            return;
+          }
+          for (const seller in sellers) {
+            //calculate comission
+            let commission = 0;
+            if(Number.parseInt(seller) >= (basar.lowestSellerNumber + basar.commissionFreeSellers)) {
+              commission = basar.commission
+            }
+
+            //
+            let sum = 0;
+            let comSum = 0;
+            let count = 0;
+            let sellerItemSales: ItemSale[] = []
+            sellers[seller].forEach((item) => {
+              count += 1;
+              sum += item.price;
+              const saleCom = (item.price * commission / 100);
+              const salePayout = item.price - saleCom;
+              comSum += saleCom;
+              sellerItemSales.push({...item, comission: saleCom, payout: salePayout})
+            })
+            const payout = sum - comSum;
+            
+            //extend result
+            result[seller] = {stats: {count: count, sum: sum, commissionSum: comSum, payout: payout}, items: sellerItemSales};
+          }
+          //return SalesList result
+          callback(null, result);
+        });
       });
     });
   }
@@ -252,7 +267,8 @@ class basarModel {
                 }
             }
             if ((rows[rows.length - 1] as {sellerNumber: number}).sellerNumber + 1 > basar.highestSellerNumber){
-                callback(Error("No new seller numbers left for this basar!"), -1);
+                callback(new Error("No new seller numbers left for this basar!"), -1);
+                return;
             }
             // If all existing seller numbers are consecutive, use the next number after the highest
             callback(null, (rows[rows.length - 1] as {sellerNumber: number}).sellerNumber + 1);

@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(morganMiddleware)
 app.use('/basar', authenticateToken, basarRoutes);
 app.use('/item', authenticateToken, itemRoutes);
-app.use('/pdf', authenticateToken, pdfRoutes);
+app.use('/pdf', pdfRoutes);
 app.use('/stats', authenticateToken, statsRoutes);
 app.use('/seller', authenticateToken, sellerRoutes);
 app.use('/login', loginRoutes)

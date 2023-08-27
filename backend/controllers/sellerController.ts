@@ -59,4 +59,26 @@ const deleteSeller = (req: Request, res: Response) => {
   });
 };
 
-export { insertSeller, updateSeller, deleteSeller };
+const getAllSellersByBasar = (req: Request, res: Response) => {
+    const basarId = req.params.basarId;
+    sModel.getAllSellersByBasar(basarId, (err : any, sellers: Seller[]) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(sellers);
+    });
+};
+
+const gettSellerById = (req: Request, res: Response) => {
+    const sellerId = req.params.sellerId;
+    sModel.getSellerById(sellerId, (err : any, seller: Seller) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(seller);
+    });
+};
+
+export { insertSeller, updateSeller, deleteSeller, getAllSellersByBasar, gettSellerById };
