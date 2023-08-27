@@ -19,6 +19,9 @@ export interface Basar {
 
 export const useBasare = defineStore("basar", () => {
   const route = useRoute();
+  const userToken = ref<string | undefined>(
+    localStorage.getItem("token") as string
+  );
 
   let basare = ref<Basar[] | null | undefined>(undefined);
   var promise: Promise<any>;
@@ -38,7 +41,11 @@ export const useBasare = defineStore("basar", () => {
   }
   async function getBasarById(id: string): Promise<Basar | null> {
     await promise;
-    return basare.value?.filter((basar) => basar.id === id).pop() ?? null;
+    return (
+      basare.value?.filter
+        ?.call(basare.value, (basar) => basar.id === id)
+        ?.pop() ?? null
+    );
   }
 
   function deleteBasar(id: string): Promise<any> {
@@ -65,5 +72,6 @@ export const useBasare = defineStore("basar", () => {
     update: updateBasar,
     getBasarById,
     deleteBasar,
+    userToken,
   };
 });

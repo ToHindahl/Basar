@@ -41,7 +41,8 @@ const editBasarIsValid = computed(
     !!editBasar.value?.maxItemsPerSeller &&
     Number.isInteger(editBasar.value?.lowerbound) &&
     (editBasar.value?.lowerbound ?? 0) >= 0 &&
-    !!editBasar.value?.countSeller
+    !!editBasar.value?.countSeller &&
+    editBasar.value?.commissionFreeSellers < editBasar.value?.countSeller
 );
 function updateBasar() {
   if (!editBasarIsValid) return;
@@ -199,17 +200,6 @@ function updateBasar() {
                   v-model="editBasar.countSeller"
                 />
                 <label for="countItems">Anzahl Verkäufer</label>
-              </div>
-              <div class="inputWrapper">
-                <input
-                  id="commissionFreeSellers"
-                  placeholder="davon kommissionsfrei"
-                  type="number"
-                  min="1"
-                  :max="editBasar.countSeller"
-                  v-model="editBasar.commissionFreeSellers"
-                />
-                <label for="commissionFreeSellers">davon kommissionsfrei</label>
               </div>
             </div>
 

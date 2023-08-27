@@ -1,6 +1,17 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { RouterLink, RouterView } from "vue-router";
+import router from "./router";
+import { useBasare } from "./stores/basar";
 // import HelloWorld from "./components/HelloWorld.vue";
+
+const basare = useBasare();
+
+function logout() {
+  basare.userToken = undefined;
+  localStorage.removeItem("token");
+  router.push("/");
+}
 </script>
 
 <template>
@@ -20,9 +31,17 @@ import { RouterLink, RouterView } from "vue-router";
     <RouterView />
     <template #fallback> Loading... </template>
   </Suspense>
+  <button id="logout" v-if="basare.userToken" @click="logout">Logout</button>
 </template>
 
 <style scoped>
+#logout {
+  position: fixed;
+  width: 5rem;
+  bottom: 2rem;
+  right: 2rem;
+}
+
 header {
   line-height: 1.5;
   max-height: 100vh;

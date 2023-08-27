@@ -2,7 +2,7 @@
 import router from "@/router";
 import { useBasare } from "@/stores/basar";
 import { sendRequest } from "@/utils/ServerBums";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const username = ref("");
@@ -18,6 +18,11 @@ const route = useRoute();
 if (!!localStorage.getItem("token"))
   router.push((route.query.redirect as string) ?? "/basare");
 
+watch(route, () => {
+  if (!!localStorage.getItem("token"))
+    router.push((route.query.redirect as string) ?? "/basare");
+});
+
 function anmelden() {
   isLoading.value = true;
   sendRequest((route.query.redirect as string) ?? "/basare", "/login", "post", {
@@ -27,6 +32,7 @@ function anmelden() {
     .then(async (response) => {
       const reponseJson = await response.json();
       localStorage.setItem("token", reponseJson.token);
+      basare.userToken = reponseJson.token;
       localStorage.setItem("username", reponseJson.username);
       basare.reload();
       router.push((route.query.redirect as string) ?? "/basare");
