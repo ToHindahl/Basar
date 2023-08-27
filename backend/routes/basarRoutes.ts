@@ -1,6 +1,11 @@
-
 import express from 'express';
-import { insertBasar, getAllBasars, getBasarsById, deleteBasar, updateBasar } from '../controllers/basarController';
+import {
+    insertBasar,
+    getAllBasars,
+    getBasarsById,
+    deleteBasar,
+    updateBasar
+} from '../controllers/basarController';
 
 const router = express.Router();
 

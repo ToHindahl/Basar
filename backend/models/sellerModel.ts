@@ -33,7 +33,7 @@ class sellerModel {
         email TEXT,
         telephone TEXT,
         sellerNumber INTEGER,
-        comission REAL,
+        commission REAL,
         basarId TEXT,
         createdAt TEXT
       )
@@ -42,7 +42,7 @@ class sellerModel {
   }
 
   insertSeller(seller: Seller, callback: (err: Error | null) => void) {
-    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, comission, basarId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.createdAt], callback);
   }
 
