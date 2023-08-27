@@ -1,9 +1,8 @@
 import sqlite3 from 'sqlite3';
-import { v4 as uuidv4 } from 'uuid';
 
 interface Item {
   id: string;
-  sellerNumber: number;
+  sellerId: string;
   price: number;
   basarId: string;
   creator: string;
@@ -28,7 +27,7 @@ class itemModel {
     const query = `
       CREATE TABLE IF NOT EXISTS items (
         id TEXT PRIMARY KEY,
-        sellerNumber INTEGER,
+        sellerId TEXT,
         price REAL,
         creator TEXT,
         page INTEGER,
@@ -40,8 +39,8 @@ class itemModel {
   }
 
   insertItem(item: Item, callback: (err: Error | null) => void) {
-    const query = 'INSERT INTO items (id, sellerNumber, price, creator, page, basarId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    this.db.run(query, [item.id, item.sellerNumber, item.price, item.creator, item.page, item.basarId, item.createdAt], callback);
+    const query = 'INSERT INTO items (id, sellerId, price, creator, page, basarId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    this.db.run(query, [item.id, item.sellerId, item.price, item.creator, item.page, item.basarId, item.createdAt], callback);
   }
 
   deleteItem(itemId: string, callback: (err: Error | null, success: boolean) => void) {
@@ -84,9 +83,9 @@ class itemModel {
     });
   }
 
-  getAllItemsByBasarBySeller(basarId: string, sellerNumber: number, callback: (err: Error | null, items: Item[]) => void) {
-    const query = 'SELECT * FROM items WHERE sellerNumber = ? AND basarId = ?';
-    this.db.all(query, [sellerNumber, basarId], (err, rows) => {
+  getAllItemsBySellerId(sellerId: string, callback: (err: Error | null, items: Item[]) => void) {
+    const query = 'SELECT * FROM items WHERE sellerId = ?';
+    this.db.all(query, [sellerId], (err, rows) => {
       if (err) {
         callback(err, []);
         return;
@@ -103,17 +102,6 @@ class itemModel {
         return;
       }
       callback(null, rows as Item[]);
-    });
-  }
-
-  getItemsCountBySellerByBasar(sellerNumber: number, basarId: string, callback: (err: Error | null, count: number) => void) {
-    const query = 'SELECT COUNT(*) AS count FROM items WHERE sellerNumber = ? AND basarId = ?';
-    this.db.get(query, [sellerNumber, basarId], (err, row) => {
-      if (err) {
-        callback(err, 0);
-        return;
-      }
-      callback(null, (row as any).count);
     });
   }
 

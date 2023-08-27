@@ -4,13 +4,13 @@ import { Basar , basarModel } from '../models/basarModel';
 import { v4 as uuidv4 } from 'uuid';
 import PDFDocument from 'pdfkit-table';
 
-import { EurFormatter } from '../utils';
+import { EurFormatter, calculateChecksum } from '../utils';
 
 const iModel = new itemModel();
 const bModel = new basarModel();
 
 interface SalesList {
-  [key: number]: {
+  [key: string]: {
     stats: {
       count: number,
       sum: number,
@@ -29,7 +29,7 @@ const getAllPdfByBasar = (req: Request, res: Response) => {
       return;
     }
     //
-    items = items.sort((a, b) => a.sellerNumber - b.sellerNumber);
+    items = items.sort((a, b) => a.sellerId < b.sellerId ? -1 : 1);
 
         //create pdf
         const doc = new PDFDocument();
@@ -38,7 +38,6 @@ const getAllPdfByBasar = (req: Request, res: Response) => {
         doc.fontSize(42).text(`Verkaufsübersicht für Basar: ${basarId}`, { align: 'center' });
 
     bModel.getSalesByBasar(basarId, (err : any, sales: SalesList) => {
-        console.log(sales);
 
 
         //insert all items by seller
@@ -55,7 +54,7 @@ const getAllPdfByBasar = (req: Request, res: Response) => {
 
           //add stats
           doc.fontSize(13);
-          doc.text(`Abrechnung für Verkäufernummer ${seller}`, {align: "justify"});
+          doc.text(`Abrechnung für Verkäufernummer ${Number.parseInt(seller) * 10 + calculateChecksum(Number.parseInt(seller))}`, {align: "justify"});
           doc.moveDown(0.5);
           doc.fontSize(10);
           doc.text(`Artikel Anzahl: ${sellerItems.stats.count}`, {align: "justify"});

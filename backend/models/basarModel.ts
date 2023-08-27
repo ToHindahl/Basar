@@ -1,10 +1,10 @@
 import sqlite3 from 'sqlite3';
-import { v4 as uuidv4 } from 'uuid';
-import { Item , itemModel, ItemSale } from '../models/itemModel';
-import { calculateChecksum } from '../utils';
+import { Item , itemModel, ItemSale } from './itemModel';
 import { SalesList } from '../controllers/pdfController';
+import { sellerModel } from './sellerModel';
 
 const iModel = new itemModel();
+const sModel = new sellerModel();
 
 interface Basar {
   id: string;
@@ -17,6 +17,7 @@ interface Basar {
   lowestSellerNumber: number;
   highestSellerNumber: number;
   commissionFreeSellers : number;
+  createdAt: string;
 }
 
 class basarModel {
@@ -39,19 +40,19 @@ class basarModel {
         maxItemsPerSeller INTEGER,
         lowestSellerNumber INTEGER,
         highestSellerNumber INTEGER,
-        commissionFreeSellers INTEGER
+        commissionFreeSellers INTEGER,
+        createdAt TEXT
       )
     `;
     this.db.run(query);
   }
 
   insertBasar(basar: Basar, callback: (err: Error | null) => void) {
-    console.log(basar);
 
     const query = `
       INSERT INTO basars 
-      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, commissionFreeSellers) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, commissionFreeSellers, createdAt) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     this.db.run(
       query,
@@ -65,7 +66,8 @@ class basarModel {
         basar.maxItemsPerSeller,
         basar.lowestSellerNumber,
         basar.highestSellerNumber,
-        basar.commissionFreeSellers
+        basar.commissionFreeSellers,
+        basar.createdAt
       ],
       callback
     );
@@ -100,21 +102,40 @@ class basarModel {
   }
 
   updateBasar(basar: Basar, callback: (err: Error | null, success: boolean) => void) {
-    const query = 'DELETE FROM basars WHERE id = ?';
-    this.db.run(query, [basar.id],(err) => {
+    this.getBasarsById(basar.id, (err : any, oldBasar: Basar) => {
       if (err) {
         callback(err, false);
         return;
       }
-      this.insertBasar(basar, (err) => {
+
+      this.getHighestSellerNumberByBasar(oldBasar.id, (err: any, sellerNumber: number) => {
         if (err) {
           callback(err, false);
           return;
         }
-        callback(null, true);
-      } ); 
-    });
 
+        //check if we can resize the basar
+        if (basar.highestSellerNumber > sellerNumber) {
+          callback(Error("TODO ERROR MESSAGE"), false);
+        }
+
+        //update
+        const query = 'DELETE FROM basars WHERE id = ?';
+        this.db.run(query, [basar.id],(err) => {
+          if (err) {
+            callback(err, false);
+            return;
+          }
+          this.insertBasar(basar, (err) => {
+            if (err) {
+              callback(err, false);
+              return;
+            }
+            callback(null, true);
+          });
+        });
+      });
+    });
   }
   
   getBasarsById(basarId: string, callback: (err: Error | null, basar: Basar) => void) {
@@ -135,15 +156,15 @@ class basarModel {
         return;
       }
 
-      items = items.sort((a, b) => a.sellerNumber - b.sellerNumber);
+      items = items.sort((a, b) => a.sellerId < b.sellerId ? -1 : 1);
   
-      //split into lists bs seller numbers
-      let sellers: {[key: number]: Item[]} = {};
+      //split into lists by seller numbers
+      let sellers: {[key: string]: Item[]} = {};
       items.forEach((item) => {
-        if (item.sellerNumber in sellers) {
-          sellers[item.sellerNumber].push(item);
+        if (item.sellerId in sellers) {
+          sellers[item.sellerId].push(item);
         } else {
-          sellers[item.sellerNumber] = [item];
+          sellers[item.sellerId] = [item];
         }
       });
 
@@ -154,12 +175,10 @@ class basarModel {
           callback(err, {});
           return;
         }
-        let i = Math.floor(basar.lowestSellerNumber / 10) + basar.commissionFreeSellers - 1
-
         for (const seller in sellers) {
           //calculate comission
           let commission = 0;
-          if(Number.parseInt(seller) > (i * 10 + calculateChecksum(i))) {
+          if(Number.parseInt(seller) >= (basar.lowestSellerNumber + basar.commissionFreeSellers)) {
             commission = basar.commission
           }
 
@@ -188,14 +207,71 @@ class basarModel {
   }
 
   getSalesByBasarBySeller(basarId: string, sellerNumber: number, callback: (err: Error | null, sales: any[]) => void) {
-    iModel.getAllItemsByBasarBySeller(basarId, sellerNumber, (err : any, items : Item[]) => {
+    sModel.getSellerByBasarIdBySellerNumber(basarId, sellerNumber, (err : any, seller) => {
       if (err) {
         callback(err, []);
-        return;
+        return; 
       }
-      callback(null, items as any);
+
+      iModel.getAllItemsBySellerId(seller.id, (err : any, items : Item[]) => {
+        if (err) {
+          callback(err, []);
+          return;
+        }
+        callback(null, items as any);
+      });
     });
   }
+
+  getNextFreeSellerNumberByBasar(basarId: string, callback: (err: Error | null, sellerNumber: number) => void) {
+    const query = 'SELECT sellerNumber FROM sellers WHERE basarId = ? ORDER BY sellerNumber ASC';
+    this.getBasarsById(basarId, (err, basar) => {
+        if (err) {
+            callback(err, -1);
+            return;
+        }
+
+        this.db.all(query, [basarId], (err, rows) => {
+        if (err) {
+            callback(err, -1);
+            return;
+        }
+    
+        if (rows.length === 0) {
+            // If no rows found, the first available seller number is 1
+            callback(null, basar.lowestSellerNumber);
+        } else {
+            let nextSellerNumber = basar.lowestSellerNumber;
+            for (let i = 0; i < rows.length; i++) {
+                if ((rows[i] as {sellerNumber: number}).sellerNumber === nextSellerNumber) {
+                    nextSellerNumber++;
+                } else {
+                    // Found a gap in seller numbers
+                    callback(null, nextSellerNumber);
+                    return;
+                }
+            }
+            if ((rows[rows.length - 1] as {sellerNumber: number}).sellerNumber + 1 > basar.highestSellerNumber){
+                callback(Error("No new seller numbers left for this basar!"), -1);
+            }
+            // If all existing seller numbers are consecutive, use the next number after the highest
+            callback(null, (rows[rows.length - 1] as {sellerNumber: number}).sellerNumber + 1);
+        }
+        });
+    });
+  }
+
+  getHighestSellerNumberByBasar(basarId: string, callback: (err: Error | null, sellerNumber: number) => void) {
+    const query = 'SELECT MAX(sellerNumber) AS maxSellerNumber FROM sellers WHERE basarId = ?';
+    this.db.get(query, [basarId], (err, row) => {
+      if (err) {
+        callback(err, -1);
+        return;
+      }
+      callback(null, (row as {maxSellerNumber: number}).maxSellerNumber);
+    });
+  }
+
 
 }
 

@@ -9,8 +9,6 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   if (token == null) return res.sendStatus(401)
 
   jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
-    console.log(err)
-
     if (err) return res.sendStatus(403)
 
     //@ts-ignore

@@ -4,6 +4,7 @@ import basarRoutes from './routes/basarRoutes';
 import itemRoutes from './routes/itemRoutes';
 import pdfRoutes from './routes/pdfRoutes';
 import loginRoutes from './routes/loginRoutes';
+import statsRoutes from './routes/statsRoutes';
 import { authenticateToken } from './middleware/authentication';
 import dotenv from 'dotenv';
 
@@ -13,19 +14,18 @@ dotenv.config(); // Load environment variables from .env file
 
 
 import Logger from "./lib/Logger";
+import sellerRoutes from './routes/sellerRoutes';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(morganMiddleware)
-//app.use('/basar', authenticateToken, basarRoutes);
-//app.use('/item', authenticateToken, itemRoutes);
-//app.use('/pdf', authenticateToken, pdfRoutes);
-//app.use('/login', authenticateToken, loginRoutes)
-app.use('/basar', basarRoutes);
-app.use('/item', itemRoutes);
-app.use('/pdf', pdfRoutes);
+app.use('/basar', authenticateToken, basarRoutes);
+app.use('/item', authenticateToken, itemRoutes);
+app.use('/pdf', authenticateToken, pdfRoutes);
+app.use('/stats', authenticateToken, statsRoutes);
+app.use('/seller', authenticateToken, sellerRoutes);
 app.use('/login', loginRoutes)
 
 app.listen(port, () => {

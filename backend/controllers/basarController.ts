@@ -8,7 +8,8 @@ const bModel : basarModel= new basarModel();
 const insertBasar = (req: Request, res: Response) => {
   const newBasar : Basar= {
     id: uuidv4().toString(),
-    ...req.body
+    ...req.body,
+    createdAt: new Date().toISOString(),
   }
   bModel.insertBasar(newBasar, (err : any) => {
     if (err) {

@@ -14,7 +14,12 @@ const login = (req: Request, res: Response) => {
     }
 
     const token = generateAccessToken({ username: username });
-    res.json({token: token});
+    res.json({token: token, username: username});
 };
 
-export { login };
+const getUser = (req: Request, res: Response) => {
+    //@ts-ignore
+    res.json({username: req.user.username});
+};
+
+export { login, getUser };
