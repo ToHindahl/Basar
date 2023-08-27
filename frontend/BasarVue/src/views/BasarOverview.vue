@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import router from "@/router";
 import { useBasare } from "@/stores/basar";
 import { sendRequest } from "@/utils/ServerBums";
-import { calculateChecksum, checkChecksum } from "@/utils/checksum";
+import {
+  addChecksum,
+  calcuateRangeFromLowerbound,
+  calcuateRangeFromLowerboundWithChecksum,
+  calculateChecksum,
+  checkChecksum,
+} from "@/utils/checksum";
 import { computed, ref } from "vue";
 
 const basare = useBasare();
@@ -67,15 +74,6 @@ function createBasar() {
       }
     });
 }
-
-function calcuateRangeFromLowerbound(lowerbound: number, countSeller: number) {
-  return {
-    lowestSellerNumber: lowerbound * 10 + calculateChecksum(lowerbound),
-    highestSellerNumber:
-      (lowerbound + countSeller - 1) * 10 +
-      calculateChecksum(lowerbound + (countSeller - 1)),
-  };
-}
 </script>
 
 <template>
@@ -96,10 +94,17 @@ function calcuateRangeFromLowerbound(lowerbound: number, countSeller: number) {
       >Keine Basare vorhanden</template
     >
     <template v-if="(basare.basare?.length ?? 0) > 0">
-      <div v-for="basar in basare.basare ?? []" class="basar">
+      <div
+        v-for="basar in basare.basare ?? []"
+        class="basar"
+        @click="router.push('/basar/' + basar.id ?? '')"
+      >
         <p>{{ basar.name }}</p>
         <p>{{ basar.date }}</p>
-        <p>{{ basar.lowestSellerNumber }} – {{ basar.highestSellerNumber }}</p>
+        <p>
+          {{ addChecksum(basar.lowestSellerNumber) }} –
+          {{ addChecksum(basar.highestSellerNumber) }}
+        </p>
         <button>Öffnen</button>
       </div>
     </template>
@@ -216,7 +221,7 @@ function calcuateRangeFromLowerbound(lowerbound: number, countSeller: number) {
       {{
         neuerBasar.lowerbound && neuerBasar.countSeller
           ? (() => {
-              const range = calcuateRangeFromLowerbound(
+              const range = calcuateRangeFromLowerboundWithChecksum(
                 neuerBasar.lowerbound ?? 100,
                 neuerBasar.countSeller ?? 1
               );

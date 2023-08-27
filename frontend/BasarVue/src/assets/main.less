@@ -21,18 +21,18 @@ a,
   }
 }
 
-@media (min-width: 124px) {
-  body {
-    padding: 2rem;
-    display: flex;
-  }
-
-  #app {
-    display: grid;
-    place-items: center;
-    gap: 1rem;
-  }
+// @media (min-width: 1024px) {
+body {
+  padding: 2rem;
+  display: flex;
 }
+
+#app {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+}
+// }
 
 button,
 .defaultButton {
@@ -87,8 +87,9 @@ button,
     width: 100%;
     border: transparent solid 2px;
     &.invalid,
-    &:invalid {
-      border-color: var(--clr-error);
+    &:invalid,
+    &.error {
+      border-color: red;
     }
 
     &::placeholder {
