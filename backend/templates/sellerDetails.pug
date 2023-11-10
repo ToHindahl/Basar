@@ -1,0 +1,20 @@
+div
+  h1 Verkäufernummer #{key}#{calculateChecksum(key)}
+  p Verkaufte Artikel: #{seller.stats.count}
+  p Summe: #{eurFormatter(seller.stats.sum)}
+  p Basar-Anteil: #{eurFormatter(seller.stats.commissionSum)}
+  p Auszahlung: #{eurFormatter(seller.stats.payout)}
+
+  // Iterate over seller items and include them in a table
+  table(style='width:100%; border: 1px solid black; border-collapse: collapse; text-align: center;')
+    tr
+      th Artikel Nummer
+      th Preis
+      th Basar Anteil
+      th Auszahlung
+    each item, index in seller.items
+      tr
+        td #{index + 1}
+        td #{eurFormatter(item.price)}
+        td #{eurFormatter(item.comission)}
+        td #{eurFormatter(item.payout)}

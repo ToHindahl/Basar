@@ -24,7 +24,8 @@
     "pug": "^3.0.2",
     "qrcode": "^1.5.3",
     "sqlite3": "^5.0.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "yaqrcode": "^0.2.1"
   },
   "devDependencies": {
     "@types/blob-stream": "^0.1.30",

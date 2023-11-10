@@ -4,7 +4,7 @@ import { Basar , basarModel } from '../models/basarModel';
 import { v4 as uuidv4 } from 'uuid';
 import PDFDocument from 'pdfkit-table';
 import { statsModel, Stats } from '../models/statsModel';
-import { LOGO_STRING, EurFormatter, calculateChecksum, generatePdf, generateQRCodeToBase64 } from '../utils';
+import { LOGO_STRING, EurFormatter, calculateChecksum, generatePdf } from '../utils';
 import pug from 'pug';
 
 import axios from 'axios';
@@ -12,13 +12,16 @@ import FormData from 'form-data';
 import * as fs from 'fs';
 import util from 'util';
 import stream from 'stream';
-import qrcode from 'qrcode';
+//@ts-ignore
+import qrcode from 'yaqrcode';
+import { sellerModel } from '../models/sellerModel';
 
 const pipeline = util.promisify(stream.pipeline);
 
 const iModel = new itemModel();
 const bModel = new basarModel();
 const sModel = new statsModel();
+const seModel = new sellerModel();
 
 interface SalesList {
   [key: string]: {
@@ -46,8 +49,12 @@ const html = `
 
 const getEmailPdf = async (req: Request, res: Response) => {
 
+  seModel.getSellerById(req.params.sellerId, async (err, seller) => {
+
   try {
-    const resp = await generatePdf(pug.renderFile('templates/label.pug', {sellerNumber: req.params.sellerNumber}));
+    const resp = await generatePdf(pug.renderFile('templates/label.pug', {sellerNumber: seller.sellerNumber + "" + calculateChecksum(seller.sellerNumber), img: qrcode(seller.id, {
+      size: 150
+  }) }));
 
     // Setze die PDF-Antwort-Header
     res.setHeader('Content-disposition', `inline; filename="label.pdf"`);
@@ -61,8 +68,51 @@ const getEmailPdf = async (req: Request, res: Response) => {
       console.error('PDF generation and delivery failed', error);
       res.status(500).send('Internal Server Error');
   }
+});
 }
 
+const getAllPdfByBasarNew = (req: Request, res: Response) => {
+  const basarId = req.params.basarId;
+
+  sModel.getStatsByBasar(basarId, (err: any, stats: Stats)=> {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    bModel.getBasarsById(basarId, (err : any, basar: Basar) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      iModel.getAllItemsByBasar(basarId, async (err : any, items : Item[]) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        bModel.getSalesByBasar(basarId, async (err : any, sales: SalesList) => {
+          try {
+            console.log(sales)
+            const resp = await generatePdf(pug.renderFile('templates/report.pug', { sellers: sales, eurFormatter: EurFormatter , calculateChecksum: calculateChecksum }));
+        
+            // Setze die PDF-Antwort-Header
+            res.setHeader('Content-disposition', `inline; filename="label.pdf"`);
+            res.setHeader('Content-type', 'application/pdf');
+        
+            // Pipe the PDF stream directly to the response
+            await pipeline(resp, res);
+        
+              console.log('PDF generation and delivery successful');
+          } catch (error) {
+              console.error('PDF generation and delivery failed', error);
+              res.status(500).send('Internal Server Error');
+          }
+      });
+      });
+    });
+  })
+};
 
 const getAllPdfByBasar = (req: Request, res: Response) => {
   const basarId = req.params.basarId;
@@ -175,4 +225,4 @@ const getAllPdfByBasar = (req: Request, res: Response) => {
   })
 };
 
-export { getAllPdfByBasar, getEmailPdf, SalesList };
+export { getAllPdfByBasar, getEmailPdf, SalesList, getAllPdfByBasarNew };

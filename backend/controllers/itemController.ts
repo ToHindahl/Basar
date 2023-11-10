@@ -21,8 +21,9 @@ const insertItem = (req : Request, res : Response) => {
                 res.status(500).json({error: err.message});
                 return;
             }
-
-
+            console.log(req.body);
+            console.log(seller);
+            console.log(basar); 
             if (seller === undefined || seller.active === undefined) {
                 res.status(400).json({error: 'Verkäufer nicht gefunden hat keine sachen abgegeben'});
                 return;
