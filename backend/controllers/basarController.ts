@@ -2,21 +2,29 @@ import {Request, Response} from 'express';
 import {basarModel} from '../models/basarModel';
 import {Basar} from '../models/basarModel';
 import {v4 as uuidv4} from 'uuid';
+import { createPretixCheckInList } from '../utils';
 
 const bModel: basarModel = new basarModel();
 
 const insertBasar = (req : Request, res : Response) => {
-    const newBasar: Basar = {
-        id: uuidv4().toString(),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    }
-    bModel.insertBasar(newBasar, (err : any) => {
-        if (err) {
-            res.status(500).json({error: err.message});
-            return;
-        }
-        res.status(201).json(newBasar);
+
+    createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "active").then((response1) => {
+        createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "payout").then((response2) => {    
+            const newBasar: Basar = {
+                id: uuidv4().toString(),
+                ...req.body,
+                pretixActivCheckInListId: response1.data.id,
+                pretixPayoutCheckInListId: response2.data.id,
+                createdAt: new Date().toISOString()
+            };
+            bModel.insertBasar(newBasar, (err : any) => {
+                if (err) {
+                    res.status(500).json({error: err.message});
+                    return;
+                }
+                res.status(201).json(newBasar);
+            });
+        });
     });
 };
 

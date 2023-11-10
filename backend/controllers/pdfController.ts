@@ -4,7 +4,17 @@ import { Basar , basarModel } from '../models/basarModel';
 import { v4 as uuidv4 } from 'uuid';
 import PDFDocument from 'pdfkit-table';
 import { statsModel, Stats } from '../models/statsModel';
-import { LOGO_STRING, EurFormatter, calculateChecksum } from '../utils';
+import { LOGO_STRING, EurFormatter, calculateChecksum, generatePdf, generateQRCodeToBase64 } from '../utils';
+import pug from 'pug';
+
+import axios from 'axios';
+import FormData from 'form-data';
+import * as fs from 'fs';
+import util from 'util';
+import stream from 'stream';
+import qrcode from 'qrcode';
+
+const pipeline = util.promisify(stream.pipeline);
 
 const iModel = new itemModel();
 const bModel = new basarModel();
@@ -19,6 +29,38 @@ interface SalesList {
       payout: number
     },
     items: ItemSale[]}
+}
+
+const html = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>My PDF</title>
+  </head>
+  <body>
+    <h1>Hello world!</h1>
+  </body>
+</html>
+`
+
+const getEmailPdf = async (req: Request, res: Response) => {
+
+  try {
+    const resp = await generatePdf(pug.renderFile('templates/label.pug', {sellerNumber: req.params.sellerNumber}));
+
+    // Setze die PDF-Antwort-Header
+    res.setHeader('Content-disposition', `inline; filename="label.pdf"`);
+    res.setHeader('Content-type', 'application/pdf');
+
+    // Pipe the PDF stream directly to the response
+    await pipeline(resp, res);
+
+      console.log('PDF generation and delivery successful');
+  } catch (error) {
+      console.error('PDF generation and delivery failed', error);
+      res.status(500).send('Internal Server Error');
+  }
 }
 
 
@@ -133,4 +175,4 @@ const getAllPdfByBasar = (req: Request, res: Response) => {
   })
 };
 
-export { getAllPdfByBasar, SalesList };
+export { getAllPdfByBasar, getEmailPdf, SalesList };

@@ -16,7 +16,10 @@ interface Basar {
     maxItemsPerSeller: number;
     lowestSellerNumber: number;
     highestSellerNumber: number;
-    commissionFreeSellers: number;
+    pretixEventId: string;
+    pretixOrganizerId: string;
+    pretixActivCheckInListId: string;
+    pretixPayoutCheckInListId: string;
     createdAt: string;
 }
 
@@ -40,7 +43,10 @@ class basarModel {
         maxItemsPerSeller INTEGER,
         lowestSellerNumber INTEGER,
         highestSellerNumber INTEGER,
-        commissionFreeSellers INTEGER,
+        pretixEventId TEXT,
+        pretixOrganizerId TEXT,
+        pretixActivCheckInListId TEXT,
+        pretixPayoutCheckInListId TEXT,
         createdAt TEXT
       )
     `;
@@ -51,8 +57,8 @@ class basarModel {
 
         const query = `
       INSERT INTO basars 
-      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, commissionFreeSellers, createdAt) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, pretixEventId, pretixOrganizerId, pretixActivCheckinListId, pretixPayoutCheckinListId, createdAt) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
         this.db.run(query, [
             basar.id,
@@ -64,7 +70,10 @@ class basarModel {
             basar.maxItemsPerSeller,
             basar.lowestSellerNumber,
             basar.highestSellerNumber,
-            basar.commissionFreeSellers,
+            basar.pretixEventId,
+            basar.pretixOrganizerId,
+            basar.pretixActivCheckInListId,
+            basar.pretixPayoutCheckInListId,
             basar.createdAt
         ], callback);
     }
@@ -297,6 +306,19 @@ getHighestSellerNumberByBasar(basarId : string, callback : (err : Error | null, 
             maxSellerNumber: number
         }).maxSellerNumber);
     });
-}}export {
-Basar,
-basarModel};
+}
+
+getBasarByPretixEventId(pretixEventId : string, callback : (err : Error | null, basar : Basar) => void) {
+    const query = 'SELECT * FROM basars WHERE pretixEventId = ?';
+    this.db.get(query, [pretixEventId], (err, row) => {
+        if (err) {
+            callback(err, {} as Basar);
+            return;
+        }
+        callback(null, row as Basar);
+    });
+}
+
+}
+
+export { Basar, basarModel};

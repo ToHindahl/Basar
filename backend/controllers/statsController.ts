@@ -1,4 +1,4 @@
-                                           import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Item , itemModel } from '../models/itemModel';
 import { Basar , basarModel } from '../models/basarModel';
 import { SalesList } from './pdfController';

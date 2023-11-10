@@ -23,30 +23,9 @@ const insertItem = (req : Request, res : Response) => {
             }
 
 
-            if (seller === undefined) {
-                const newSeller: Seller = {
-                    id: uuidv4().toString(),
-                    sellerNumber: req.body.sellerNumber,
-                    basarId: req.body.basarId,
-                    createdAt: new Date().toISOString(),
-                    firstname: '',
-                    lastname: '',
-                    email: '',
-                    telephone: '',
-                    commission: 0
-                };
-
-                if (req.body.sellerNumber > (basar.commissionFreeSellers + basar.lowestSellerNumber)) {
-                    newSeller.commission = basar.commission;
-                }
-
-                sModel.insertSeller(newSeller, (err) => {
-                    if (err) {
-                        res.status(500).json({error: err.message});
-                        return;
-                    }
-                    insertItem(req, res);
-                });
+            if (seller === undefined || seller.active === undefined) {
+                res.status(400).json({error: 'Verkäufer nicht gefunden hat keine sachen abgegeben'});
+                return;
             } else {
                 const newItem: Item = {
                     id: uuidv4().toString(),

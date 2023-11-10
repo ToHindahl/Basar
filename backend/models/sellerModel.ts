@@ -13,6 +13,9 @@ interface Seller {
   sellerNumber: number;
   commission: number;
   basarId: string;
+  pretixOrderId: string;
+  active?: string|null;
+  payout?: string|null;
   createdAt: string;
 }
 
@@ -35,6 +38,9 @@ class sellerModel {
         sellerNumber INTEGER,
         commission REAL,
         basarId TEXT,
+        pretixOrderId TEXT,
+        active TEXT,
+        payout TEXT,
         createdAt TEXT
       )
     `;
@@ -42,8 +48,8 @@ class sellerModel {
   }
 
   insertSeller(seller: Seller, callback: (err: Error | null) => void) {
-    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.createdAt], callback);
+    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, pretixOrderId, active, payout, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.pretixOrderId, seller.active, seller.payout, seller.createdAt], callback);
   }
 
   deleteSeller(sellerId: string, callback: (err: Error | null, success: boolean) => void) {
@@ -149,6 +155,17 @@ class sellerModel {
             callback(null, rows as Seller[]);
         });
     }
+
+    getSellerByPretixOrderId(pretixOrderId: string, callback: (err: Error | null, seller: Seller) => void) {
+        const query = 'SELECT * FROM sellers WHERE pretixOrderId = ?';
+        this.db.get(query, [pretixOrderId], (err, row) => {
+            if (err) {
+                callback(err, {} as Seller);
+                return;
+            }
+            callback(null, row as Seller);
+        });
+    } 
 
 }
 

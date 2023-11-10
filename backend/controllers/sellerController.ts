@@ -25,12 +25,12 @@ const insertSeller = (req: Request, res: Response) => {
         };
 
         sModel.insertSeller(newSeller, (err) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.status(201).json(newSeller);
-    });
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.status(201).json(newSeller);
+        });
     });
 
 };

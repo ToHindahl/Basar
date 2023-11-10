@@ -11,11 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/nodemailer": "^6.4.14",
+    "@types/pug": "^2.0.9",
+    "@types/qrcode": "^1.5.5",
     "body-parser": "^1.19.0",
+    "canvas": "^2.11.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "nodemailer": "^6.9.7",
     "pdfkit": "^0.13.0",
     "pdfkit-table": "^0.1.99",
+    "pug": "^3.0.2",
+    "qrcode": "^1.5.3",
     "sqlite3": "^5.0.2",
     "uuid": "^9.0.0"
   },
