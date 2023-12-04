@@ -6,6 +6,7 @@ import axios from 'axios';
 import { getPretixOrderInformation, setSellerNumberPretix } from '../utils';
 import { sendEmail } from '../email';
 import pug from 'pug';
+import { calculateChecksum } from '../utils';
 
 const bModel : basarModel = new basarModel();
 const sModel = new sellerModel();
@@ -72,7 +73,7 @@ function handlePretixOrderPlaced(req : Request, res : Response) {
                         }
                         console.log("createt dat seller");
                         //@ts-ignore
-                        sendEmail(process.env.SMTP_FROM, response.data.email, "Basar", pug.renderFile('templates/email.pug', {name: "" + newSeller.firstname + " " + newSeller.lastname, sellerNumber: newSeller.sellerNumber, link: "https://crispy-halibut-r4jpprxq4rvhx44r-3000.preview.app.github.dev/pdf/email/" + basar.id + "/" + newSeller.id}))
+                        sendEmail(process.env.SMTP_FROM, response.data.email, "Basar", pug.renderFile('templates/email.pug', {name: "" + newSeller.firstname + " " + newSeller.lastname, sellerNumber: calculateChecksum(newSeller.sellerNumber), link: "https://crispy-halibut-r4jpprxq4rvhx44r-3000.preview.app.github.dev/pdf/email/" + basar.id + "/" + newSeller.id}))
                         setSellerNumberPretix(req.body.organizer, req.body.event, req.body.code, newSeller.sellerNumber);
                         res.status(201).json(newSeller);
                     });
@@ -99,7 +100,7 @@ function handlePretixOrderPlaced(req : Request, res : Response) {
                         }
                         console.log("createt dat Vorstand");
                         //@ts-ignore
-                        sendEmail(process.env.SMTP_FROM, response.data.email, "Basar", pug.renderFile('templates/email.pug', {name: "" + newSeller.firstname + " " + newSeller.lastname, sellerNumber: newSeller.sellerNumber, link: "https://crispy-halibut-r4jpprxq4rvhx44r-3000.preview.app.github.dev/pdf/email/" + basar.id + "/" + newSeller.id}))
+                        sendEmail(process.env.SMTP_FROM, response.data.email, "Basar", pug.renderFile('templates/email.pug', {name: "" + newSeller.firstname + " " + newSeller.lastname, sellerNumber: calculateChecksum(newSeller.sellerNumber), link: "https://crispy-halibut-r4jpprxq4rvhx44r-3000.preview.app.github.dev/pdf/email/" + basar.id + "/" + newSeller.id}))
                         setSellerNumberPretix(req.body.organizer, req.body.event, req.body.code, newSeller.sellerNumber);
                         res.status(201).json(newSeller);
                     });
