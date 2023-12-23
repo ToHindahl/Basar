@@ -8,13 +8,13 @@ const bModel: basarModel = new basarModel();
 
 const insertBasar = (req : Request, res : Response) => {
 
-    createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "active").then((response1) => {
-        createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "payout").then((response2) => {    
+    //createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "active").then((response1) => {
+        //createPretixCheckInList(req.body.pretixOrganizerId, req.body.pretixEventId, "payout").then((response2) => {    
             const newBasar: Basar = {
                 id: uuidv4().toString(),
                 ...req.body,
-                pretixActivCheckInListId: response1.data.id,
-                pretixPayoutCheckInListId: response2.data.id,
+                //pretixActivCheckInListId: response1.data.id,
+                //pretixPayoutCheckInListId: response2.data.id,
                 createdAt: new Date().toISOString()
             };
             bModel.insertBasar(newBasar, (err : any) => {
@@ -24,8 +24,8 @@ const insertBasar = (req : Request, res : Response) => {
                 }
                 res.status(201).json(newBasar);
             });
-        });
-    });
+       // });
+   // });
 };
 
 const updateBasar = (req : Request, res : Response) => {

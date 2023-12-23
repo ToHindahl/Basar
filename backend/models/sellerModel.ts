@@ -14,8 +14,8 @@ interface Seller {
   commission: number;
   basarId: string;
   pretixOrderId: string;
-  active?: string|null;
-  payout?: string|null;
+  //active?: string|null;
+  //payout?: string|null;
   createdAt: string;
 }
 
@@ -39,17 +39,19 @@ class sellerModel {
         commission REAL,
         basarId TEXT,
         pretixOrderId TEXT,
-        active TEXT,
-        payout TEXT,
         createdAt TEXT
       )
     `;
+
+    //Update QUerry
+    // active TEXT,
+    // payout TEXT,
     this.db.run(query);
   }
 
   insertSeller(seller: Seller, callback: (err: Error | null) => void) {
-    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, pretixOrderId, active, payout, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.pretixOrderId, seller.active, seller.payout, seller.createdAt], callback);
+    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, pretixOrderId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.pretixOrderId, seller.createdAt], callback);
   }
 
   deleteSeller(sellerId: string, callback: (err: Error | null, success: boolean) => void) {

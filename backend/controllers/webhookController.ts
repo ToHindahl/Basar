@@ -25,9 +25,9 @@ const webhook = (req : Request, res : Response) => {
         case "pretix.event.order.changed":
             handlePretixOrderChanged(req, res);
             break;
-        case "pretix.event.checkin":
-            handlePretixCheckIn(req, res);
-            break;
+        //case "pretix.event.checkin":
+        //    handlePretixCheckIn(req, res);
+        //    break;
         default:
             res.status(200).json({success: true});
             break;
@@ -61,8 +61,8 @@ function handlePretixOrderPlaced(req : Request, res : Response) {
                         basarId: basar.id,
                         sellerNumber: sellerNumber,
                         pretixOrderId: response.data.code,
-                        active: null,
-                        payout: null,
+                        //active: null,
+                        //payout: null,
                         createdAt: new Date().toISOString(),
                     };
     
@@ -88,8 +88,8 @@ function handlePretixOrderPlaced(req : Request, res : Response) {
                         basarId: basar.id,
                         sellerNumber: sellerNumber,
                         pretixOrderId: response.data.code,
-                        active: null,
-                        payout: null,
+                        //active: null,
+                        //payout: null,
                         createdAt: new Date().toISOString(),
                     };
     
@@ -157,8 +157,8 @@ function handlePretixOrderChanged(req : Request, res : Response) {
                 basarId: seller.basarId,
                 sellerNumber: seller.sellerNumber,
                 pretixOrderId: seller.pretixOrderId,
-                active: seller.active,
-                payout: seller.payout,
+                //active: seller.active,
+                //payout: seller.payout,
                 createdAt: seller.createdAt,
             };
             
@@ -178,7 +178,7 @@ function handlePretixOrderChanged(req : Request, res : Response) {
     });;
 }
 
-function handlePretixCheckIn(req : Request, res : Response) {
+/*function handlePretixCheckIn(req : Request, res : Response) {
     bModel.getBasarByPretixEventId(req.body.event, (err, basar) => {
         sModel.getSellerByPretixOrderId(req.body.code, (err, seller) => {
             if(req.body.checkin_list == basar.pretixActivCheckInListId) {
@@ -236,7 +236,7 @@ function handlePretixCheckIn(req : Request, res : Response) {
             }
         });
     });
-}
+}*/
 
 export {
     webhook,

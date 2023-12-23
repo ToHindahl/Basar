@@ -24,8 +24,9 @@ const insertItem = (req : Request, res : Response) => {
             console.log(req.body);
             console.log(seller);
             console.log(basar); 
-            if (seller === undefined || seller.active === undefined) {
-                res.status(400).json({error: 'Verkäufer nicht gefunden hat keine sachen abgegeben'});
+            // || seller.active === undefined)
+            if (seller === undefined) {
+                res.status(400).json({error: 'Verkäufer nicht gefunden!'});
                 return;
             } else {
                 const newItem: Item = {

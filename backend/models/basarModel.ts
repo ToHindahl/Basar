@@ -18,8 +18,8 @@ interface Basar {
     highestSellerNumber: number;
     pretixEventId: string;
     pretixOrganizerId: string;
-    pretixActivCheckInListId: string;
-    pretixPayoutCheckInListId: string;
+    //pretixActivCheckInListId: string;
+    //pretixPayoutCheckInListId: string;
     createdAt: string;
 }
 
@@ -45,11 +45,13 @@ class basarModel {
         highestSellerNumber INTEGER,
         pretixEventId TEXT,
         pretixOrganizerId TEXT,
-        pretixActivCheckInListId TEXT,
-        pretixPayoutCheckInListId TEXT,
         createdAt TEXT
       )
     `;
+
+    // Insert into Statement
+    //pretixActivCheckInListId TEXT,
+    //pretixPayoutCheckInListId TEXT,
         this.db.run(query);
     }
 
@@ -57,8 +59,8 @@ class basarModel {
 
         const query = `
       INSERT INTO basars 
-      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, pretixEventId, pretixOrganizerId, pretixActivCheckinListId, pretixPayoutCheckinListId, createdAt) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (id, name, date, location, organizer, commission, maxItemsPerSeller, lowestSellerNumber, highestSellerNumber, pretixEventId, pretixOrganizerId, createdAt) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
         this.db.run(query, [
             basar.id,
@@ -72,8 +74,8 @@ class basarModel {
             basar.highestSellerNumber,
             basar.pretixEventId,
             basar.pretixOrganizerId,
-            basar.pretixActivCheckInListId,
-            basar.pretixPayoutCheckInListId,
+            //basar.pretixActivCheckInListId,
+            //basar.pretixPayoutCheckInListId,
             basar.createdAt
         ], callback);
     }

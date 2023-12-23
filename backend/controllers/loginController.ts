@@ -10,6 +10,7 @@ const login = (req: Request, res: Response) => {
     const password = req.body.password;
 
     if (password != process.env.APP_PASSWORD){
+        console.log(password);
         return res.sendStatus(403);
     }
 
