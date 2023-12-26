@@ -28,6 +28,11 @@ export async function sendEmail(from: string, to: string, subject: string, html:
       to: to, // list of receivers
       subject: subject, // Subject line
       html: html, // plain text body
+      attachments: [{
+        path: "Praktische Hinweise für Basar Feb 2024.pdf"
+      }, {
+        path: "Abgabezettel für Basar Feb 2024.pdf"
+      }]
     });
     return `Message sent: ${info.messageId}`;
   } catch (error) {

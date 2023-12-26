@@ -50,7 +50,7 @@ class sellerModel {
   }
 
   insertSeller(seller: Seller, callback: (err: Error | null) => void) {
-    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, pretixOrderId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const query = 'INSERT INTO sellers (id, firstname, lastname, email, telephone, sellerNumber, commission, basarId, pretixOrderId, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     this.db.run(query, [seller.id, seller.firstname, seller.lastname, seller.email, seller.telephone, seller.sellerNumber, seller.commission, seller.basarId, seller.pretixOrderId, seller.createdAt], callback);
   }
 
